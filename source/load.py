@@ -49,8 +49,7 @@ def merge_water():
     final_merge = final_merge[final_indices]
     final_merge.to_csv('../data/drought-usage'+year+".csv")
 
-
-# uncomment to make the merges CSV's in your directory (only have to run once)
+# uncomment to make the merged drought-usage2010.csv in your directory (only have to run once)
 # parse_drought()
 # merge_water()
 final_merge = pd.read_csv('../data/drought-usage'+year+".csv")
