@@ -51,13 +51,15 @@ def merge_water():
 
 
 
-def read_industry(scale = False):
+def read_industry(keep_fips, scale = False):
     indu = pd.read_csv('../data/industry_occupation.csv', encoding= "latin-1")
     indu.dropna(axis=0, inplace = True)
+    indu = indu.loc[indu['year'] == 2010]
+    indu = indu.loc[indu['fips'].isin(list(keep_fips))]
     features = ['agriculture',  'construction',  'manufacturing' ,\
          'wholesale_trade', 'retail_trade', \
-             'transport_utilities','information','finance_insurance_realestate',\
-                 'prof_scientific_waste','edu_health','arts_recreation','other','public_admin']
+             'transport_utilities','information','finance_insurance_realestate'
+                ]
     training = indu[features]
     if scale:
         training.div(indu['total_employed'])
