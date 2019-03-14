@@ -49,6 +49,20 @@ def merge_water():
     final_merge = final_merge[final_indices]
     final_merge.to_csv('../data/drought-usage'+year+".csv")
 
+
+
+def read_industry(scale = False):
+    indu = pd.read_csv('../data/industry_occupation.csv', encoding= "latin-1")
+    indu.dropna(axis=0, inplace = True)
+    features = ['agriculture',  'construction',  'manufacturing' ,\
+         'wholesale_trade', 'retail_trade']
+    training = indu[features]
+    if scale:
+        training.div(indu['total_employed'])
+    labels = indu['fips']
+    return training, labels
+
+
 # uncomment to make the merged drought-usage2010.csv in your directory (only have to run once)
 # parse_drought()
 # merge_water()
@@ -70,12 +84,14 @@ dt_long['adjusted_effect'] = (base**dt_long['level'])*dt_long['affected']
 # see the data in its final form
 print(dt_long.head())
 # plotting to see data
-# dt_long.loc[dt_long['level'] == 1]
-# plt.hist(np.log(1+dt_long['adjusted_effect']), 100)
-# plt.show()
+dt_long.loc[dt_long['level'] == 1]
+plt.hist(np.log(1+dt_long['adjusted_effect']), 100)
+plt.show()
 
-# plt.hist(np.log(1+dt_long['total_withdrawal_1']), 100)
-# plt.show()
+plt.hist(np.log(1+dt_long['total_withdrawal_1']), 100)
+plt.show()
 
-# plt.scatter(dt_long['adjusted_effect'], np.log10(1+dt_long['total_withdrawal_1']))
-# plt.show()
+plt.scatter(dt_long['adjusted_effect'], np.log10(1+dt_long['total_withdrawal_1']))
+plt.show()
+
+
