@@ -55,7 +55,9 @@ def read_industry(scale = False):
     indu = pd.read_csv('../data/industry_occupation.csv', encoding= "latin-1")
     indu.dropna(axis=0, inplace = True)
     features = ['agriculture',  'construction',  'manufacturing' ,\
-         'wholesale_trade', 'retail_trade']
+         'wholesale_trade', 'retail_trade', \
+             'transport_utilities','information','finance_insurance_realestate',\
+                 'prof_scientific_waste','edu_health','arts_recreation','other','public_admin']
     training = indu[features]
     if scale:
         training.div(indu['total_employed'])
@@ -65,33 +67,33 @@ def read_industry(scale = False):
 
 # uncomment to make the merged drought-usage2010.csv in your directory (only have to run once)
 # parse_drought()
-# merge_water()
-final_merge = pd.read_csv('../data/drought-usage'+year+".csv")
-indices = ['state_x','county_x','fips', 'none', 'd0', 'd1', 'd2',\
-        'd3', 'd4','total_withdrawal_1']
-final_merge_small = final_merge[indices]
-final_merge_small.loc[final_merge_small['state_x'] =='AL']
+# # merge_water()
+# final_merge = pd.read_csv('../data/drought-usage'+year+".csv")
+# indices = ['state_x','county_x','fips', 'none', 'd0', 'd1', 'd2',\
+#         'd3', 'd4','total_withdrawal_1']
+# final_merge_small = final_merge[indices]
+# final_merge_small.loc[final_merge_small['state_x'] =='AL']
 
-idVars = ['state_x','county_x','fips','total_withdrawal_1']
+# idVars = ['state_x','county_x','fips','total_withdrawal_1']
 
-dt_long = pd.melt(final_merge_small, id_vars=idVars, var_name = "level", value_name = 'affected')
+# dt_long = pd.melt(final_merge_small, id_vars=idVars, var_name = "level", value_name = 'affected')
 
-dt_long['level'], uniques = pd.factorize(dt_long['level'])
+# dt_long['level'], uniques = pd.factorize(dt_long['level'])
 
-base = 2
-dt_long['adjusted_effect'] = (base**dt_long['level'])*dt_long['affected']
+# base = 2
+# dt_long['adjusted_effect'] = (base**dt_long['level'])*dt_long['affected']
 
-# see the data in its final form
-print(dt_long.head())
-# plotting to see data
-dt_long.loc[dt_long['level'] == 1]
-plt.hist(np.log(1+dt_long['adjusted_effect']), 100)
-plt.show()
+# # see the data in its final form
+# print(dt_long.head())
+# # plotting to see data
+# dt_long.loc[dt_long['level'] == 1]
+# plt.hist(np.log(1+dt_long['adjusted_effect']), 100)
+# plt.show()
 
-plt.hist(np.log(1+dt_long['total_withdrawal_1']), 100)
-plt.show()
+# plt.hist(np.log(1+dt_long['total_withdrawal_1']), 100)
+# plt.show()
 
-plt.scatter(dt_long['adjusted_effect'], np.log10(1+dt_long['total_withdrawal_1']))
-plt.show()
+# plt.scatter(dt_long['adjusted_effect'], np.log10(1+dt_long['total_withdrawal_1']))
+# plt.show()
 
 
