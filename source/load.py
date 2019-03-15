@@ -54,8 +54,10 @@ def merge_water():
 def read_industry(keep_fips, scale = False):
     indu = pd.read_csv('../data/industry_occupation.csv', encoding= "latin-1")
     indu.dropna(axis=0, inplace = True)
-    indu = indu.loc[indu['year'] == 2010]
-    indu = indu.loc[indu['fips'].isin(list(keep_fips))]
+    indu_fips = set(indu['fips'])
+    indu = indu.groupby('fips').mean()
+    indu['fips'] = indu.index
+    indu = indu.loc[indu['fips'].isin(keep_fips)]
     features = ['agriculture',  'construction',  'manufacturing' ,\
          'wholesale_trade', 'retail_trade', \
              'transport_utilities','information','finance_insurance_realestate'
@@ -65,7 +67,6 @@ def read_industry(keep_fips, scale = False):
         training.div(indu['total_employed'])
     labels = indu['fips']
     return training, labels
-
 
 # uncomment to make the merged drought-usage2010.csv in your directory (only have to run once)
 # parse_drought()
