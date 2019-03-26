@@ -27,26 +27,30 @@ def parse_drought():
     sum_affected = s_droughts.groupby('fips').mean()
     sum_affected['fips'] = sum_affected.index
     final_drought_dt = countyState.merge(sum_affected, left_on = 'fips', right_on='fips')
-
+    levels = ['d0', 'd1', 'd2', 'd3', 'd4']
+    final_drought_dt['level_d'] = np.zeros(final_drought_dt.shape[0])
+    for i, level in enumerate(levels):
+        per10Ind = final_drought_dt[level]>10.0
+        final_drought_dt['level_d'].loc[per10Ind] = i*np.ones(sum(per10Ind))
     final_drought_dt.to_csv('../data/final_drought'+str(year)+".csv")
 
 
 
-def merge_water(withdraw_catergories):
+
+def merge_water(withdraw_categories):
     drought_dt = pd.read_csv('../data/final_drought'+str(year)+".csv", encoding= "latin-1")
     water = pd.read_csv("../data/water_usage.csv")
-    indices = ['state','county','fips', 'population'] + withdraw_catergories
+    indices = ['state','county','fips', 'population'] + withdraw_categories
     water['population'] = water['population'].convert_objects(convert_numeric=True)
-    water[withdraw_catergories] = water[withdraw_catergories].convert_objects(convert_numeric=True)
-    water[withdraw_catergories] = water[withdraw_catergories].div(water['population'], axis = 0)
+    water[withdraw_categories] = water[withdraw_categories].convert_objects(convert_numeric=True)
+    water[withdraw_categories] = water[withdraw_categories].div(water['population'], axis = 0)
     water = water[indices]
     final_merge = drought_dt.merge(water,  left_on = 'fips', right_on='fips')
     drought_levels = ['none', 'd0', 'd1', 'd2','d3', 'd4']
     final_merge[drought_levels] = final_merge[drought_levels].mul(final_merge['population'], axis = 0)
     final_indices = ['state_x','county_x','fips', 'none', 'd0', 'd1', 'd2',
-        'd3', 'd4'] + withdraw_catergories
+        'd3', 'd4', 'level_d'] + withdraw_categories
     final_merge = final_merge[final_indices]
-    print(final_merge.head(100))
     final_merge.to_csv('../data/drought-usage'+str(year)+".csv")
 
 
