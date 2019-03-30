@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from scipy import stats
 from sklearn import linear_model
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import silhouette_samples, silhouette_score
+from sklearn import decomposition
 
 
 def exponential(level, affected, base = 2):
@@ -61,6 +63,9 @@ def plot_usageVeffect_d(data, withdraw_category, cluster, means = None, log = Tr
     plt.scatter(X, y)
     if means.size > 0:
         plt.plot(means['level_d'], means[withdraw_category], 'r^-')
+    plt.title("Water Usage Vs. Drought Level")
+    plt.xlabel('Drought Level')
+    plt.ylabel(withdraw_category)
     plt.savefig("plots/"+"c" + str(cluster)+"_"+ withdraw_category + "Veffect_d.png")
     plt.close()
 
@@ -78,7 +83,25 @@ def cluster_by_earning(final_merge, model, verbose = False):
     d = {'fips': list(labels_earn), 'cluster':  model.labels_}
     cluster_df = pd.DataFrame(d)
     final_merge_cluster = final_merge.merge(cluster_df, left_on = 'fips', right_on='fips')
-    return final_merge_cluster
+    return final_merge_cluster, training_earn
+
+
+def plot_cluster(data, feature1, feature2):
+    df = pd.DataFrame(dict(x=data[feature1], y=data[feature2], label=data['cluster']))
+    groups = df.groupby('label')
+    fig, ax = plt.subplots()
+    ax.margins(0.05) # Optional, just adds 5% padding to the autoscaling
+    for name, group in groups:
+        ax.plot(group.x, group.y, marker='o', linestyle='', ms=6, alpha = 0.4, label=name)
+    ax.legend()
+    plt.xlabel(feature1)
+    plt.ylabel(feature2)
+    plt.title("K-Means Clustering of Counties by Industry Earning")
+    plt.savefig("plot3/"+feature1+'V'+feature2+"_kmeans.png")
+    plt.close()
+
+
+
 
 
 def cluster_by_usage(final_merge, withdraw_categories,  model, verbose = False):
@@ -152,36 +175,74 @@ def get_mean_effect(data, withdraw_category, cluster, plot = False, log = False)
         y = data[withdraw_category]
         withdraw_means = data[['level_d', withdraw_category]].groupby('level_d').mean()
     # print(withdraw_means)
-    withdraw_means.to_csv('c'+str(cluster)+"_"+ withdraw_category + ".csv", sep='\t', encoding='utf-8')
+    # withdraw_means.to_csv('c'+str(cluster)+"_"+ withdraw_category + ".csv", sep='\t', encoding='utf-8')
 
     withdraw_means['level_d'] = withdraw_means.index
     if plot:
         plot_usageVeffect_d(data, withdraw_category, cluster,withdraw_means, log)
     return withdraw_means
 
-def get_sum_slope(withdraw_means, withdraw_category):
-    means = list(withdraw_means[withdraw_category])
-    return sum([j-i for i, j in zip(means[:-1], t[1:])])
+def get_slope(withdraw_means, withdraw_category):
+    reg = linear_model.LinearRegression()
+    X = withdraw_means['level_d']
+    X = X.reshape((X.size, 1))
+    y = withdraw_means[withdraw_category]
+    reg.fit(X, y)
+    return reg.coef_
 
 
 withdraw_categories = ['pub_sup_10', 'dom_sup_4', 'ind_7', \
-            'irrigation_7', 'crop_3', 'livestock_3', \
-            'aqua_7', 'mining_7', 'thermoelectric_27',\
-                'gro_wat_1', 'surf_wat_1',
-                'total_withdrawal_1']
+                'irrigation_1', 'livestock_3', \
+                'aqua_7', 'mining_7', 'thermoelectric_27',\
+                    'gro_wat_1', 'surf_wat_1',
+                    ]
 
-merge_water(withdraw_categories)
-final_merge = pd.read_csv('../data/drought-usage'+str(year)+".csv")
-model = KMeans(n_clusters=5, n_init = 200, random_state = 1234)
-# final_merge_cluster = cluster_by_usage(final_merge, withdraw_categories,  model, verbose = True)
 
-final_merge_cluster = cluster_by_earning(final_merge, model, verbose=True)
 
-clusters = np.unique(model.labels_)
-for c in clusters:
-    data = extract_cluster(final_merge_cluster, c, withdraw_categories)
-    for withdraw_category in withdraw_categories:
-        print("cluster", c)
-        print('withdraw category', withdraw_category)
-        withdraw_means = get_mean_effect(data, withdraw_category, c, plot = True, log = True)
-        slope_sum = get_sum_slope(withdraw_means, withdraw_category)
+
+
+def main():
+    # merge_water(withdraw_categories)
+    final_merge = pd.read_csv('../data/drought-usage'+str(year)+".csv")
+    model = KMeans(n_clusters=5, n_init = 200, random_state = 1234)
+    # final_merge_cluster = cluster_by_usage(final_merge, withdraw_categories,  model, verbose = True)
+
+    final_merge_cluster, training_earn = cluster_by_earning(final_merge, model, verbose=True)
+    
+    clusters = np.unique(model.labels_)
+    for c in clusters:
+        data = extract_cluster(final_merge_cluster, c, withdraw_categories)
+        for withdraw_category in withdraw_categories:
+            withdraw_means = get_mean_effect(data, withdraw_category, c, plot = False, log = True)
+            slope_sum = get_slope(withdraw_means, withdraw_category)
+            if slope_sum < -0.3:
+                print(slope_sum)
+                print("cluster", c)
+                print('withdraw category', withdraw_category)
+                print("\n")
+    # 
+    print(list(training_earn))
+    # print(model.labels_.shape)
+    # print(training_earn.shape)
+    training_earn['cluster'] = model.labels_
+    plot_cluster(training_earn, 'manufacturing', 'construction')
+
+
+    features  = list(training_earn)
+    # print(model.labels_.shape)
+    # print(training_earn.shape)
+    training_earn['cluster'] = model.labels_
+
+    for i in range(len(features)):
+        for j in range(len(features)):
+            if i != j:
+                plot_cluster(training_earn, features[i], features[j])
+
+
+
+if __name__ == "__main__":
+    main()
+    # pass
+
+
+
