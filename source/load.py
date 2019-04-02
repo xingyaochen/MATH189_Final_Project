@@ -1,15 +1,7 @@
-# earnings 
-# doughts 
-# educational attainment 
-
 import pandas as pd
 import numpy as np 
 import datetime
 import matplotlib.pyplot as plt
-
-
-# edu = pd.read_csv("education_attainment.csv", encoding= "latin-1")
-# indu = pd.read_csv("industry_occupation.csv", encoding= "latin-1")
 
 year = 2010
 def parse_drought():
@@ -91,42 +83,5 @@ def read_earning(keep_fips, scale = False):
     labels = training['fips']
     training = training[features_earn[1:]]
     training.dropna(axis=0, inplace = True)
-    # if scale:
-    #     total_med = earnings2010['total_med']
-    #     total_med = total_med.convert_objects(convert_numeric=True)
-    #     training = training.div(total_med,  axis = 0)
     return training, labels
-
-
-# uncomment to make the merged drought-usage2010.csv in your directory (only have to run once)
-# parse_drought()
-# # merge_water()
-# final_merge = pd.read_csv('../data/drought-usage'+year+".csv")
-# indices = ['state_x','county_x','fips', 'none', 'd0', 'd1', 'd2',\
-#         'd3', 'd4','total_withdrawal_1']
-# final_merge_small = final_merge[indices]
-# final_merge_small.loc[final_merge_small['state_x'] =='AL']
-
-# idVars = ['state_x','county_x','fips','total_withdrawal_1']
-
-# dt_long = pd.melt(final_merge_small, id_vars=idVars, var_name = "level", value_name = 'affected')
-
-# dt_long['level'], uniques = pd.factorize(dt_long['level'])
-
-# base = 2
-# dt_long['adjusted_effect'] = (base**dt_long['level'])*dt_long['affected']
-
-# # see the data in its final form
-# print(dt_long.head())
-# # plotting to see data
-# dt_long.loc[dt_long['level'] == 1]
-# plt.hist(np.log(1+dt_long['adjusted_effect']), 100)
-# plt.show()
-
-# plt.hist(np.log(1+dt_long['total_withdrawal_1']), 100)
-# plt.show()
-
-# plt.scatter(dt_long['adjusted_effect'], np.log10(1+dt_long['total_withdrawal_1']))
-# plt.show()
-
 
