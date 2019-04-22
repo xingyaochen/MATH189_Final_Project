@@ -7,11 +7,17 @@ import numpy as np
 import pandas as pd
 import os
 import time
+from plotly.offline import iplot, init_notebook_mode
+import plotly.graph_objs as go
+import plotly.io as pio
 
 # Recurses through Drought Level Folder to read each csv file in folder
 
+if not os.path.exists('maps'):
+    os.mkdir('maps')
+
 for csv_file in sorted(os.listdir("../data/Weekly Drought Level Graphs")):
-    # print(csv_file)
+    print(csv_file)
     date = csv_file.split("_")[-1]
     date = date.split(".")[0]
     csv_file="../data/Weekly Drought Level Graphs/"+csv_file
@@ -32,7 +38,9 @@ for csv_file in sorted(os.listdir("../data/Weekly Drought Level Graphs")):
     )
     curr_name = 'DroughtLevel_wk_'+ str(date)
     
-    py.plot(fig, filename = curr_name)
+    # py.plot(fig, filename = curr_name)
+    pio.write_image(fig, 'maps/'+curr_name+".png")
+
     # time.sleep(0.5)
     print('Done with week ' + date)
 
