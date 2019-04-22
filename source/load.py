@@ -6,25 +6,60 @@ import matplotlib.pyplot as plt
 year = 2010
 def parse_drought():
     dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d')
-    droughts = pd.read_csv("../data/droughts.csv", parse_dates=['valid_start', "valid_end"], date_parser=dateparse, encoding= "latin-1")
-    s_droughts = droughts.loc[(droughts['d0']>0.0) | \
+    droughts = pd.read_csv("../data/droughts.csv", encoding= "latin-1")
+    droughts = droughts.loc[(droughts['d0']>0.0) | \
                     (droughts['d1']>0.0) | \
                     (droughts['d2']>0.0)|\
                     (droughts['d3']>0.0)|\
                     (droughts['d4']>0.0)
                     ]
-    s_droughts = s_droughts.loc[(s_droughts['valid_start'] >= str(year)+'-01-01') & \
-        (s_droughts['valid_end'] <= str(year)+'-12-31')]
-    countyState = s_droughts[s_droughts.columns[0:3]].drop_duplicates()
-    sum_affected = s_droughts.groupby('fips').mean()
-    sum_affected['fips'] = sum_affected.index
-    final_drought_dt = countyState.merge(sum_affected, left_on = 'fips', right_on='fips')
+    print(droughts.shape)
+    all_weeks = np.unique(droughts['valid_start'])
+    droughts['level_d'] = np.zero(droughts.shape[0])
     levels = ['d0', 'd1', 'd2', 'd3', 'd4']
-    final_drought_dt['level_d'] = np.zeros(final_drought_dt.shape[0])
     for i, level in enumerate(levels):
-        per10Ind = final_drought_dt[level]>10.0
-        final_drought_dt['level_d'].loc[per10Ind] = i*np.ones(sum(per10Ind))
-    final_drought_dt.to_csv('../data/final_drought'+str(year)+".csv")
+        per10Ind = droughts[level]>10.0
+        droughts['level_d'].loc[per10Ind] = i*np.ones(sum(per10Ind))
+    for i, wk in enumerate(all_weeks):
+        weekly_drought = droughts.loc[droughts['valid_start'] == wk]
+        print(weekly_drought.head())
+        weekly_drought.to_csv('../data/weekly_drought_'+str(wk)+".csv")
+        print(i)
+
+def parseEdu():
+    edu = pd.read_csv("../data/education_attainment.csv", encoding= "latin-1")
+    percFeatures = ['fips', 'year','pct_less_than_hs', 'pct_hs_diploma', 'pct_college_or_associates', 'pct_college_bachelors_or_higher']
+    edu = edu[percFeatures]
+    edu_latest = edu.loc[edu['year'] == '2012-2016']
+    edu_latest.to_csv('../data/education2012.csv')
+    return edu_latest
+
+
+def parseEarning():
+    earnings = pd.read_csv("../data/earnings.csv", encoding= "latin-1")
+    features_earn = ['fips', 'total_med', 'total_agri_fish_mine', \
+        'construction', 'manufacturing', 'wholesale_trade', 'retail_trade',\
+                'utilities', 'information',\
+                    'fin_ins_realest', \
+                        'total_prof_sci_mgmt_admin', \
+                            'total_edu_health_social', \
+                                'total_arts_ent_acc_food',\
+                                        'pub_admin']
+    years = np.unique(earnings['year'])
+    for year in years:
+        earnings_year = earnings.loc[earnings['year'] == year]
+        earnings_year = earnings_year[features_earn]
+        earnings_year = earnings_year.convert_objects(convert_numeric=True)
+        earnings_year.dropna(axis=0, inplace = True)
+        filename = "../data/yearlyEarningData/earning_"+str(year)+".csv"
+        earnings_year.to_csv(filename)
+    earnings = earnings[features_earn]
+    earnings = earnings.convert_objects(convert_numeric=True)
+    earnings.dropna(axis=0, inplace = True)
+    return earnings
+
+
+
 
 
 

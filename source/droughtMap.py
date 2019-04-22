@@ -34,4 +34,4 @@ fig = ff.create_choropleth(
     county_outline={'color': 'rgb(255,255,255)', 'width': 0.5}, 
     legend_title='% change', title='% Domestic Water Usage in 2010'
 )
-py.iplot(fig, filename='Drought Levels 2010')
+py.plot(fig, filename='Drought Levels 2010')
