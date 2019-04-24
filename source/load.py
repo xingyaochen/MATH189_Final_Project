@@ -4,9 +4,9 @@ import datetime
 import matplotlib.pyplot as plt
 
 year = 2010
-def parse_drought():
+def parse_drought(save_weekly = False):
     dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d')
-    droughts = pd.read_csv("../data/droughts.csv", encoding= "latin-1")
+    droughts = pd.read_csv("../data/droughts.csv",  parse_dates = ['valid_start', 'valid_end'], date_parser = dateparse, encoding= "latin-1")
     droughts = droughts.loc[(droughts['d0']>0.0) | \
                     (droughts['d1']>0.0) | \
                     (droughts['d2']>0.0)|\
@@ -15,16 +15,17 @@ def parse_drought():
                     ]
     print(droughts.shape)
     all_weeks = np.unique(droughts['valid_start'])
-    droughts['level_d'] = np.zero(droughts.shape[0])
+    droughts['level_d'] = np.zeros(droughts.shape[0])
     levels = ['d0', 'd1', 'd2', 'd3', 'd4']
     for i, level in enumerate(levels):
         per10Ind = droughts[level]>10.0
         droughts['level_d'].loc[per10Ind] = i*np.ones(sum(per10Ind))
-    for i, wk in enumerate(all_weeks):
-        weekly_drought = droughts.loc[droughts['valid_start'] == wk]
-        print(weekly_drought.head())
-        weekly_drought.to_csv('../data/weekly_drought_'+str(wk)+".csv")
-        print(i)
+    if save_weekly:
+        for i, wk in enumerate(all_weeks):
+            weekly_drought = droughts.loc[droughts['valid_start'] == wk]
+            weekly_drought.to_csv('../data/weekly_drought_'+str(wk)+".csv")
+            print(i)
+    return droughts
 
 def parseEdu():
     edu = pd.read_csv("../data/education_attainment.csv", encoding= "latin-1")
