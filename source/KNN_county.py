@@ -62,7 +62,7 @@ class KNN_county:
         return mean_squared_error(y_true, y_pred)
     
     def num_mistakes(self, y_true, y_pred):
-        return np.sum(np.array(y_true) != np.array(y_pred))
+        return np.sum(np.array(y_true) != np.array(y_pred))/len(y_true)
 
 
 
@@ -86,4 +86,4 @@ class Baseline:
         return mean_squared_error(y_true, y_pred)
     
     def num_mistakes(self, y_true, y_pred):
-        return np.sum(np.array(y_true) != np.array(y_pred))
+        return np.sum(np.array(y_true) != np.array(y_pred))/len(y_pred)

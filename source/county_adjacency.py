@@ -37,11 +37,11 @@ def main():
 
     sep_list = [i for i in range(0, 20, 1)]
 
-    mse_scoreMat_baseline_test = np.empty((len(sep_list), numFolds))
-    mse_scoreMat_baseline_train = np.empty((len(sep_list), numFolds))
+    num_mistakesMat_baseline_test = np.empty((len(sep_list), numFolds))
+    num_mistakesMat_baseline_train = np.empty((len(sep_list), numFolds))
 
-    mse_scoreMat_knn_test = np.empty((len(sep_list), numFolds))
-    mse_scoreMat_knn_train = np.empty((len(sep_list), numFolds))
+    num_mistakesMat_knn_test = np.empty((len(sep_list), numFolds))
+    num_mistakesMat_knn_train = np.empty((len(sep_list), numFolds))
 
 
     clf_base = Baseline()
@@ -72,28 +72,28 @@ def main():
             mse_knn_test.append(clf.num_mistakes(y_pred_test, y_test))
             mse_knn_train.append(clf.num_mistakes(y_pred_train, y_train))
 
-        mse_scoreMat_knn_train[:,i] = mse_knn_train
-        mse_scoreMat_knn_test[:,i] = mse_knn_test 
+        num_mistakesMat_knn_train[:,i] = mse_knn_train
+        num_mistakesMat_knn_test[:,i] = mse_knn_test 
 
-        mse_scoreMat_baseline_train[:,i] = mse_baseline_train
-        mse_scoreMat_baseline_test[:,i] = mse_baseline_test
+        num_mistakesMat_baseline_train[:,i] = mse_baseline_train
+        num_mistakesMat_baseline_test[:,i] = mse_baseline_test
         print("fold", i, "done") 
 
-    mse_mean_score_knn_train = np.mean(mse_scoreMat_knn_train, axis = 1)
-    mse_mean_score_knn_test = np.mean(mse_scoreMat_knn_test, axis = 1)
-    mse_mean_score_baseline_train = np.mean(mse_scoreMat_baseline_train, axis = 1)
-    mse_mean_score_baseline_test = np.mean(mse_scoreMat_baseline_test, axis = 1)
+    mse_mean_score_knn_train = np.mean(num_mistakesMat_knn_train, axis = 1)
+    mse_mean_score_knn_test = np.mean(num_mistakesMat_knn_test, axis = 1)
+    mse_mean_score_baseline_train = np.mean(num_mistakesMat_baseline_train, axis = 1)
+    mse_mean_score_baseline_test = np.mean(num_mistakesMat_baseline_test, axis = 1)
 
     lab_names = ['KNN Train', "KNN Test", "Baseline Train", "Baseline Test"]
     all_scores = [mse_mean_score_knn_train, mse_mean_score_knn_test, mse_mean_score_baseline_train, mse_mean_score_baseline_test]
     for i, scores in enumerate(all_scores):
         plt.plot(sep_list, scores, label = lab_names[i])
-    plt.ylim([0, int(max(mse_mean_score_baseline_test))+1])
+    plt.ylim([0, max(mse_mean_score_baseline_test) + 0.1*max(mse_mean_score_baseline_test)])
     plt.legend(loc = 'best')
     plt.title("Cross Validation Analysis")
     plt.xlabel("Degrees of Separation")
-    plt.ylabel("MSE")
-    plt.savefig("drought_classifier_plots/CV_knn.png")
+    plt.ylabel("Error Rate")
+    plt.savefig("drought_classifier_plots/CV_knn_num_mistakes.png")
     plt.close()
 
     best_clf = KNN_clfs[np.argmin(mse_mean_score_knn_test)]
@@ -125,7 +125,7 @@ def main():
         mse_knn_test.append(best_clf.num_mistakes(y_pred_test, y_test))
         mse_knn_train.append(best_clf.num_mistakes(y_pred_train, y_train))
 
-        print("test size", test_set_size, "done") 
+        print("test size", test_set_size, "done")
 
     lab_names = ['KNN Train', "KNN Test"]
     all_scores = [mse_knn_train, mse_knn_test]
@@ -133,12 +133,12 @@ def main():
     for i, scores in enumerate(all_scores):
         plt.plot(training_set_sizes, scores, label = lab_names[i])
 
-    plt.ylim([0, max(mse_knn_test)+0.2])
+    plt.ylim([0, max(mse_knn_test)+0.1* max(mse_knn_test)])
     plt.legend(loc = 'best')
     plt.title("Learning Curve Analysis")
     plt.xlabel("Trainning Set Size")
-    plt.ylabel("MSE")
-    plt.savefig("drought_classifier_plots/LC_knn.png")
+    plt.ylabel("Error Rate")
+    plt.savefig("drought_classifier_plots/LC_knn_num_mistakes.png")
 
 
 
@@ -159,7 +159,7 @@ def main():
     best_clf.fit(X_train_real, y_train_real)
     y_pred_real = best_clf.predict(X_test_real)
     # print(y_pred)
-    print(best_clf.mse_score(y_pred_real, y_test_real))
+    print(best_clf.num_mistakes(y_pred_real, y_test_real))
 
 
     fname_split = fname_test.split(".")[-2] 
