@@ -2,17 +2,17 @@ import pandas as pd
 import numpy as np 
 import datetime
 import matplotlib.pyplot as plt
-
+import os
 year = 2010
 def parse_drought(save_weekly = False):
     dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d')
     droughts = pd.read_csv("../data/droughts.csv",  parse_dates = ['valid_start', 'valid_end'], date_parser = dateparse, encoding= "latin-1")
-    droughts = droughts.loc[(droughts['d0']>0.0) | \
-                    (droughts['d1']>0.0) | \
-                    (droughts['d2']>0.0)|\
-                    (droughts['d3']>0.0)|\
-                    (droughts['d4']>0.0)
-                    ]
+    # droughts = droughts.loc[(droughts['d0']>0.0) | \
+    #                 (droughts['d1']>0.0) | \
+    #                 (droughts['d2']>0.0)|\
+    #                 (droughts['d3']>0.0)|\
+    #                 (droughts['d4']>0.0)
+    #                 ]
     print(droughts.shape)
     all_weeks = np.unique(droughts['valid_start'])
     droughts['level_d'] = np.zeros(droughts.shape[0])
@@ -26,6 +26,28 @@ def parse_drought(save_weekly = False):
             weekly_drought.to_csv('../data/weekly_drought_'+str(wk)+".csv")
             print(i)
     return droughts
+
+
+def parse_drought_subset(folder, save_weekly = True):
+    # dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d')
+    directory = "../data/"+ folder
+    print(len(sorted(os.listdir(directory))))
+    for csv_file in sorted(os.listdir(directory)):
+        print(directory + '/' + csv_file )
+        if csv_file[0] == ".": continue
+        droughts = pd.read_csv(directory + '/' + csv_file, encoding= "latin-1")
+        if save_weekly:
+            all_weeks = np.unique(droughts['valid_start'])
+            for i, wk in enumerate(all_weeks):
+                weekly_drought = droughts.loc[droughts['valid_start'] == wk]
+
+                print("../data/weeklyDroughtSubset/" + csv_file.split(".")[0] + "_" +str(wk)+".csv")
+
+                weekly_drought.to_csv("../data/weeklyDroughtSubset/" + csv_file.split(".")[0] + "_" +str(wk)+".csv")
+                # print(i)
+    # return droughts
+
+
 
 def parseEdu():
     edu = pd.read_csv("../data/education_attainment.csv", encoding= "latin-1")

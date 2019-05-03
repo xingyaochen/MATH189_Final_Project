@@ -5,7 +5,7 @@ from sklearn.metrics import mean_squared_error
 from KNN_county import *
 import numpy as np
 import matplotlib.pyplot as plt
-from weeklyDroughtMap import *
+# from weeklyDroughtMap import *
 
 np.random.seed(seed=1234)
 
