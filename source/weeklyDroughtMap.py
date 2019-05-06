@@ -11,7 +11,6 @@ import time
 from plotly.offline import iplot, init_notebook_mode
 import plotly.graph_objs as go
 import plotly.io as pio
-from makeGif import * 
 
 
 def makeDroughtPNG(input_folder, output_folder, pattern):
@@ -27,9 +26,8 @@ def makeDroughtPNG(input_folder, output_folder, pattern):
         rel_counties = np.unique(df_sample['county'])
         scope = scope.union(set(rel_states))
         counties = counties.union(set(rel_counties))
-    print(counties)
+    # print(counties)
     print(scope)
-    return 
     colorscale = ["#ffffe5", "#feeba2","#febc46","#f07818","#b74203","#662506"]
 
     for csv_file in sorted(os.listdir("../data/"+ input_folder )):
@@ -39,14 +37,11 @@ def makeDroughtPNG(input_folder, output_folder, pattern):
         date = date.split(".")[0]
         csv_file="../data/"+ input_folder  + "/" +csv_file
         df_sample = pd.read_csv(csv_file)
-        # rel_states = np.unique(df_sample['state'])
-        # print(rel_states)
         values = df_sample['level_d'].tolist() # Read in values contained within your file
         fips = df_sample['fips'].tolist() # Read in FIPS Codes
          # Create a colorscale
         # "#ffffe5"
         # For colorscale help: https://react-colorscales.getforge.io/
-
         # endpts = list(np.linspace(0, 4, len(colorscale) - 1)) # Identify a suitable range for your data
         title = 'Drought level for week of '+ str(date)
         fig = ff.create_choropleth(
@@ -61,7 +56,6 @@ def makeDroughtPNG(input_folder, output_folder, pattern):
         pio.write_image(fig, output_folder + "/" +curr_name+".png")
 
         print('Done with week ' + date)
-
 
 
 
@@ -81,24 +75,13 @@ def makeOneDroughtPNG(csv_file, png_filename, value, title, save = False):
     # For colorscale help: https://react-colorscales.getforge.io/
 
     # endpts = list(np.linspace(0, 4, len(colorscale) - 1)) # Identify a suitable range for your data
-
     fig = ff.create_choropleth(
         fips=fips, values=values, colorscale=colorscale, show_state_data=True, # If your values is a list of numbers, you can bin your values into half-open intervals
         county_outline={'color': 'rgb(200,200,200)', 'width': 0.5}, 
         legend_title='drought level', title= title
     )
-    # curr_name = 'DroughtLevel_wk_'+ str(date)
-    
-    # py.plot(fig, filename = curr_name)
     if save:
         pio.write_image(fig, png_filename)
-    # time.sleep(0.5)
-    # return fig
-# test_g = 33
 
-grps = [10, 14, 16, 21, 24, 27, 43]
-scopes = []
-for g in grps:
-    print(g)
-    makeDroughtPNG('weeklyDroughtSubset', 'maps_grp'+ str(g), 'group'+str(g)+"_")
-    # makeGif('maps_grp'+str(g), 80, 'grp'+ str(g)+ '.gif')
+
+

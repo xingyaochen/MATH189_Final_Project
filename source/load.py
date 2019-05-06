@@ -7,12 +7,6 @@ year = 2010
 def parse_drought(save_weekly = False):
     dateparse = lambda x: pd.datetime.strptime(x, '%Y-%m-%d')
     droughts = pd.read_csv("../data/droughts.csv",  parse_dates = ['valid_start', 'valid_end'], date_parser = dateparse, encoding= "latin-1")
-    # droughts = droughts.loc[(droughts['d0']>0.0) | \
-    #                 (droughts['d1']>0.0) | \
-    #                 (droughts['d2']>0.0)|\
-    #                 (droughts['d3']>0.0)|\
-    #                 (droughts['d4']>0.0)
-    #                 ]
     print(droughts.shape)
     all_weeks = np.unique(droughts['valid_start'])
     droughts['level_d'] = np.zeros(droughts.shape[0])

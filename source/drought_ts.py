@@ -1,10 +1,10 @@
 from load import * 
 from pandas import Series 
 import matplotlib.pyplot as plt
-from county_adjacency import * 
+from KNN_county import * 
 from dtaidistance import dtw
 import time 
-
+from weeklyDroughtMap import * 
 
 def find_max_dist_counties(droughts, max_threshold):
     min_threshold = 1
@@ -41,10 +41,13 @@ def find_max_dist_counties(droughts, max_threshold):
                     continue
     return candidate_groupL, test_min_groupL
 
+
 def plot_groups_ts(candidate_groupL, save_weekly = False):
     for i, c_group in enumerate(list(candidate_groupL)):
         drought_subset = droughts.loc[(droughts['fips'].isin(c_group))]
         if save_weekly:
+            if not os.path.exists('../data/drought_ts_data'):
+                os.mkdir('../data/drought_ts_data')
             drought_subset.to_csv('../data/drought_ts_data/drought_subset_group'+ str(i).zfill(2) + ".csv")
         fig, ax = plt.subplots()
         for key, grp in drought_subset.groupby(['fips']):
@@ -56,7 +59,17 @@ def plot_groups_ts(candidate_groupL, save_weekly = False):
         plt.close()
 
 
-droughts = parse_drought(save_weekly = False)
-candidate_groupL, test_min_groupL = find_max_dist_counties(droughts, 13)
-plot_groups_ts(candidate_groupL, save_weekly = False)
-parse_drought_subset('drought_ts_data')
+def main()
+    droughts = parse_drought(save_weekly = False)
+    candidate_groupL, test_min_groupL = find_max_dist_counties(droughts, 13)
+    plot_groups_ts(candidate_groupL, save_weekly = True)
+    parse_drought_subset('drought_ts_data')
+
+    # plotting GIFs
+    grps = [10, 14, 16, 21, 24, 27, 43]
+    scopes = []
+    for g in grps:
+        print("Plotting group", g)
+        makeDroughtPNG('weeklyDroughtSubset', 'maps_grp'+ str(g), 'group'+str(g)+"_")
+        makeGif('maps_grp'+str(g), 80, 'grp'+ str(g)+ '.gif')
+

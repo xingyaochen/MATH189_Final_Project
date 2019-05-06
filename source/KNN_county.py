@@ -1,6 +1,10 @@
 import numpy as np 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
+
+
+# KNN style Classifier for county drought level
+
 class KNN_county:
     def __init__(self, adj_list, degree_sep):
         self.mapping = {}
@@ -67,11 +71,7 @@ class KNN_county:
 
 
 
-
-
-
-
-
+# Baseline "Dummy" Classifier 
 class Baseline:
     def __init__(self):
         pass 
@@ -87,3 +87,20 @@ class Baseline:
     
     def num_mistakes(self, y_true, y_pred):
         return np.sum(np.array(y_true) != np.array(y_pred))/len(y_pred)
+
+
+def make_county_adjacencyL():
+    fname = "../data/county_adjacency.txt"
+    latest = None
+    adjacencyL = {}
+    with open(fname,  encoding="latin=1") as f:
+        for line in f:
+            line = line.replace("\n", "")
+            line = line.replace('"', "")
+            lineL = line.split("\t")
+            if lineL[0]:
+                adjacencyL[int(lineL[1])] = {int(lineL[-1])}
+                latest = int(lineL[1])
+            else:
+                adjacencyL[latest].add(int(lineL[-1]))
+    return adjacencyL
